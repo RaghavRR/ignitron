@@ -1918,17 +1918,26 @@ const Home = () => {
 </section>
 
 {/* FEATURED PROJECTS */}
-<section className="relative bg-white py-16 sm:py-20 lg:py-24 overflow-hidden">
+<section className="
+  relative
+  bg-white
+  py-12
+  sm:py-16
+  lg:py-20
+  xl:py-24
+  overflow-hidden
+">
 
   <div className="
     relative
     z-10
     w-full
-    max-w-[1200px]
+    max-w-[1280px]
     mx-auto
     px-4
     sm:px-6
     lg:px-8
+    xl:px-10
   ">
 
     {/* ================= HEADER ================= */}
@@ -1938,12 +1947,13 @@ const Home = () => {
       md:flex-row
       md:items-end
       md:justify-between
-      gap-5
-      mb-10
-      sm:mb-12
+      gap-6
+      mb-8
+      sm:mb-10
+      lg:mb-12
     ">
 
-      <div className="min-w-0">
+      <div className="min-w-0 max-w-3xl">
 
         <div className="
           flex
@@ -1952,29 +1962,31 @@ const Home = () => {
           mb-4
         ">
           <span className="
-            w-9
-            sm:w-12
+            w-8
+            sm:w-10
+            lg:w-12
             h-[2px]
             bg-ignitron-orange
             shrink-0
           " />
 
           <p className="
-            text-[11px]
+            text-[10px]
             sm:text-xs
             md:text-sm
             font-bold
             tracking-[2px]
             text-ignitron-orange
+            whitespace-nowrap
           ">
             FEATURED PROJECTS
           </p>
         </div>
 
-
         <h2 className="
-          text-3xl
-          sm:text-4xl
+          text-2xl
+          sm:text-3xl
+          md:text-4xl
           lg:text-[42px]
           leading-[1.1]
           font-extrabold
@@ -1989,12 +2001,13 @@ const Home = () => {
           Into Reality.
         </h2>
 
-
         <p className="
           mt-3
           text-sm
           sm:text-base
           text-gray-500
+          leading-6
+          sm:leading-7
           max-w-xl
         ">
           Explore real-world projects built through curiosity,
@@ -2011,6 +2024,8 @@ const Home = () => {
           hidden
           md:inline-flex
           shrink-0
+          self-start
+          md:self-auto
           items-center
           gap-2
           px-5
@@ -2044,12 +2059,14 @@ const Home = () => {
         sm:grid-cols-2
         lg:grid-cols-3
         xl:grid-cols-4
-        2xl:grid-cols-5
 
         gap-5
         sm:gap-6
+        lg:gap-7
 
         items-stretch
+        w-full
+        min-w-0
       ">
 
         {projects.map((project, index) => (
@@ -2069,11 +2086,14 @@ const Home = () => {
             <div className="
               absolute
               top-0
-              left-4
+              left-3
+              sm:left-4
               z-30
 
-              w-[58px]
-              h-[38px]
+              w-12
+              sm:w-[58px]
+              h-8
+              sm:h-[38px]
 
               rounded-full
 
@@ -2085,7 +2105,8 @@ const Home = () => {
               items-center
               justify-center
 
-              text-[11px]
+              text-[10px]
+              sm:text-[11px]
               font-bold
               tracking-[2px]
               text-white
@@ -2131,18 +2152,13 @@ const Home = () => {
           inline-flex
           items-center
           gap-2
-
           px-5
           py-3
-
           rounded-lg
-
           bg-ignitron-orange
           text-white
-
           text-sm
           font-semibold
-
           shadow-md
         "
       >
