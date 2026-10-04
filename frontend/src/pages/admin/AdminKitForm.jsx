@@ -42,6 +42,9 @@ const AdminKitForm = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState('');
+
   // ==========================================
   // FETCH EDIT KIT
   // ==========================================
@@ -118,6 +121,62 @@ const AdminKitForm = () => {
     }));
   };
 
+const handleImageDrop = (e) => {
+  e.preventDefault();
+
+  const file = e.dataTransfer.files?.[0];
+
+  if (!file || !file.type.startsWith('image/')) {
+    setError('Please upload a valid image file.');
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    const imageUrl = reader.result;
+
+    setImageFile(file);
+    setImagePreview(imageUrl);
+
+    setForm((prev) => ({
+      ...prev,
+      image: imageUrl,
+    }));
+
+    setError('');
+  };
+
+  reader.readAsDataURL(file);
+};
+
+const handleImageSelect = (e) => {
+  const file = e.target.files?.[0];
+
+  if (!file || !file.type.startsWith('image/')) {
+    setError('Please upload a valid image file.');
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    const imageUrl = reader.result;
+
+    setImageFile(file);
+    setImagePreview(imageUrl);
+
+    setForm((prev) => ({
+      ...prev,
+      image: imageUrl,
+    }));
+
+    setError('');
+  };
+
+  reader.readAsDataURL(file);
+};
+
   // ==========================================
   // ARRAY INPUTS
   // ==========================================
@@ -185,7 +244,7 @@ const AdminKitForm = () => {
       return 'Description is required';
     }
 
-    if (!form.image.trim()) {
+    if (!form.image.trim() && !imageFile) {
       return 'Product image is required';
     }
 
@@ -407,31 +466,56 @@ const AdminKitForm = () => {
         {/* ================================= */}
 
         <FormSection title="Media">
-          <Input
-            label="Product Image URL *"
-            name="image"
-            value={form.image}
-            onChange={handleChange}
-            placeholder="https://..."
-          />
+          <div>
+            <label className="block text-sm font-medium mb-2">
+              Product Image *
+            </label>
 
-          {form.image && (
-            <div>
-              <p className="text-sm font-medium mb-2">
-                Image Preview
-              </p>
+            <div
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={handleImageDrop}
+              onClick={() => document.getElementById('product-image').click()}
+              className="w-full min-h-48 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-black transition bg-gray-50"
+            >
+              {imagePreview ? (
+                <img
+                  src={imagePreview}
+                  alt="Product Preview"
+                  className="w-full max-w-md h-56 object-contain rounded-xl"
+                />
+              ) : form.image ? (
+                <img
+                  src={form.image}
+                  alt="Product Preview"
+                  className="w-full max-w-md h-56 object-contain rounded-xl"
+                />
+              ) : (
+                <>
+                  <div className="text-4xl mb-3">📁</div>
 
-              <img
-                src={form.image}
-                alt="Preview"
-                className="w-full max-w-md h-56 object-cover rounded-xl border"
-                onError={(e) => {
-                  e.currentTarget.style.display =
-                    'none';
-                }}
+                  <p className="font-medium">
+                    Drag & Drop your image here
+                  </p>
+
+                  <p className="text-sm text-gray-500 mt-1">
+                    or click to browse
+                  </p>
+
+                  <p className="text-xs text-gray-400 mt-2">
+                    PNG, JPG, JPEG, WEBP
+                  </p>
+                </>
+              )}
+
+              <input
+                id="product-image"
+                type="file"
+                accept="image/png,image/jpeg,image/jpg,image/webp"
+                onChange={handleImageSelect}
+                className="hidden"
               />
             </div>
-          )}
+          </div>
 
           <Input
             label="Video URL"

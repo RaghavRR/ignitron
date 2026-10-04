@@ -38,6 +38,11 @@ const getKitImageUrl = (image) => {
     return defaultKitImage;
   }
 
+  // Base64 image
+  if (value.startsWith('data:image/')) {
+    return value;
+  }
+
   // External URL
   if (/^https?:\/\//i.test(value)) {
     return value;

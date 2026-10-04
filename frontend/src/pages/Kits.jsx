@@ -28,30 +28,26 @@ const getKitImageUrl = (image) => {
     return defaultKitImage;
   }
 
+  // Base64 / uploaded image
+  if (value.startsWith('data:image/')) {
+    return value;
+  }
+
   // External image
-  // https://example.com/image.jpg
   if (/^https?:\/\//i.test(value)) {
     return value;
   }
 
   // Backend uploaded image
-  // /uploads/abc.jpg
   if (value.startsWith('/uploads/')) {
     return `${getBackendBaseUrl()}${value}`;
   }
 
   // Frontend public path
-  // /images/example.jpg
   if (value.startsWith('/')) {
     return value;
   }
 
-  // Invalid values such as:
-  // "Raghav Rastogi"
-  // "abc"
-  // "image"
-  //
-  // Don't break the UI.
   return defaultKitImage;
 };
 

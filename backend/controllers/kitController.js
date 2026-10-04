@@ -235,12 +235,12 @@ const createKit = async (req, res) => {
     // IMAGE URL
     // ==========================================
 
-    if (!isValidUrl(image.trim())) {
-      return res.status(400).json({
-        success: false,
-        message: 'Please enter a valid product image URL',
-      });
-    }
+ if (!image?.trim()) {
+  return res.status(400).json({
+    success: false,
+    message: 'Product image is required',
+  });
+}
 
     // ==========================================
     // VIDEO URL
