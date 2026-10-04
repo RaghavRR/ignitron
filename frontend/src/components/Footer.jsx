@@ -8,6 +8,7 @@ import {
   FaEnvelope,
   FaPhoneAlt,
   FaMapMarkerAlt,
+  FaFacebookF
 } from "react-icons/fa";
 import EditableImage from "./EditableImage";
 
@@ -415,6 +416,28 @@ const Footer = () => {
                   "
                 >
                   <FaInstagram size={14} />
+                </a>
+
+                <a
+                  href="https://www.facebook.com/profile.php?id=61592422078669"
+                  aria-label="Facebook"
+                  className="
+                    w-9
+                    h-9
+                    rounded-full
+                    border
+                    border-white/10
+                    flex
+                    items-center
+                    justify-center
+                    text-gray-400
+                    hover:text-white
+                    hover:bg-ignitron-orange
+                    hover:border-ignitron-orange
+                    transition-all
+                  "
+                >
+                  <FaFacebookF size={14} />
                 </a>
 
               </div>
