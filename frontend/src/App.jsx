@@ -39,6 +39,7 @@ import AdminResources from './pages/admin/AdminResources';
 import AdminResourceForm from './pages/admin/AdminResourceForm';
 import AdminImpact from './pages/admin/AdminImpact';
 import AdminLeads from './pages/admin/AdminLeads';
+import ScrollToTop from './components/scrollToTop';
 
 const PublicLayout = ({ children }) => (
   <>
@@ -51,6 +52,8 @@ const PublicLayout = ({ children }) => (
 
 function App() {
   return (
+    <>
+    <ScrollToTop />
     <Routes>
       {/* Public site */}
       <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
@@ -100,6 +103,7 @@ function App() {
 
       <Route path="*" element={<PublicLayout><NotFound /></PublicLayout>} />
     </Routes>
+    </>
   );
 }
 

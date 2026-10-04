@@ -316,7 +316,7 @@ const Footer = () => {
                 <span>
                   IGNITRON Future Labs,
                   <br />
-                  Ghaziabad, Uttar Pradesh
+                  Ghaziabad, Delhi NCR, Uttar Pradesh
                 </span>
 
               </div>
@@ -374,7 +374,7 @@ const Footer = () => {
               <div className="flex items-center gap-2">
 
                 <a
-                  href="#"
+                  href="https://www.linkedin.com/company/ignitronfuturelabs/"
                   aria-label="LinkedIn"
                   className="
                     w-9
@@ -396,7 +396,7 @@ const Footer = () => {
                 </a>
 
                 <a
-                  href="#"
+                  href="https://www.instagram.com/ignitronfuturelabs?stkn=MWoxdDZlYmM0ZjZ5Yg=="
                   aria-label="Instagram"
                   className="
                     w-9
@@ -415,28 +415,6 @@ const Footer = () => {
                   "
                 >
                   <FaInstagram size={14} />
-                </a>
-
-                <a
-                  href="#"
-                  aria-label="YouTube"
-                  className="
-                    w-9
-                    h-9
-                    rounded-full
-                    border
-                    border-white/10
-                    flex
-                    items-center
-                    justify-center
-                    text-gray-400
-                    hover:text-white
-                    hover:bg-ignitron-orange
-                    hover:border-ignitron-orange
-                    transition-all
-                  "
-                >
-                  <FaYoutube size={14} />
                 </a>
 
               </div>
