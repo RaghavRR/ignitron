@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html { scroll-behavior: smooth; }
+body { @apply bg-ignitron-light text-ignitron-navy font-sans; }
+
+.btn-primary {
+  @apply inline-flex items-center gap-2 bg-ignitron-orange hover:bg-orange-600 text-white font-semibold px-6 py-3 rounded-lg transition-colors duration-200;
+}
+.btn-secondary {
+  @apply inline-flex items-center gap-2 bg-transparent border-2 border-ignitron-navy hover:bg-ignitron-navy hover:text-white text-ignitron-navy font-semibold px-6 py-3 rounded-lg transition-colors duration-200;
+}
+.section { @apply py-16 md:py-24 px-6 md:px-12 lg:px-20; }
+.container-max { @apply max-w-7xl mx-auto; }
+.card { @apply bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg transition-shadow duration-200; }
+.eyebrow { @apply text-ignitron-orange font-semibold uppercase tracking-wide text-sm; }
+.input { @apply w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-ignitron-orange text-sm; }
+.heading-lg { @apply text-3xl md:text-5xl font-extrabold text-ignitron-navy leading-tight; }
+.heading-md { @apply text-2xl md:text-3xl font-bold text-ignitron-navy; }
