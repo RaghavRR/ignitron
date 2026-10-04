@@ -16,6 +16,12 @@ import SectionHeader from '../components/SectionHeader';
 import ProjectCard from '../components/ProjectCard';
 import StatCounter from '../components/StatCounter';
 import Loader from '../components/Loader';
+import roboticsImg from '../images/missions/robotics.jpeg';
+import aiImg from '../images/missions/ai.jpeg';
+import iotImg from '../images/missions/iot.jpeg';
+import realWorldImg from '../images/missions/real-world.jpeg';
+import innovationImg from '../images/missions/innovation.jpeg';
+import labImg from '../images/missions/lab.jpeg';
 
 const solutions = [
   {
@@ -54,32 +60,32 @@ const missions = [
   {
     title: 'Build a Robot',
     icon: <FaRobot />,
-    image: '../src/images/missions/robotics.jpeg',
+    image: roboticsImg,
   },
   {
     title: 'Explore AI',
     icon: <FaBrain />,
-    image: '../src/images/missions/ai.jpeg',
+    image: aiImg,
   },
   {
     title: 'Build an IoT Solution',
     icon: <FaWifi />,
-    image: '../src/images/missions/iot.jpeg',
+    image: iotImg,
   },
   {
     title: 'Solve a Real-World Problem',
     icon: <FaSeedling />,
-    image: '../src/images/missions/real-world.jpeg',
+    image: realWorldImg,
   },
   {
     title: 'Create an Innovation Project',
     icon: <FaLightbulb />,
-    image: '../src/images/missions/innovation.jpeg',
+    image: innovationImg,
   },
   {
     title: 'Build a Future-Ready Lab',
     icon: <FaBuilding />,
-    image: '../src/images/missions/lab.jpeg',
+    image: labImg,
   },
 ];
 
