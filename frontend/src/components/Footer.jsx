@@ -121,6 +121,16 @@ const Footer = () => {
                 Learn • Build • Innovate • Lead
               </p>
 
+              <p className="
+                mt-3
+                text-xs
+                leading-5
+                text-gray-500
+                max-w-[300px]
+              ">
+                Aligned with <span className="text-ignitron-orange">NEP 2020</span> | Empowering Experiential & Skill-Based Learning
+              </p>
+
             </div>
 
 
