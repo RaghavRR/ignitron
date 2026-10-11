@@ -5,7 +5,15 @@ import KitDetails from './pages/KitDetails';
 
 import AdminKits from './pages/admin/AdminKits';
 import AdminKitForm from './pages/admin/AdminKitForm';
-
+import Solutions from './pages/Solutions';
+import CurriculumDevelopment from './pages/solutions/CurriculumDevelopment';
+import STEMWorkshops from './pages/solutions/STEMWorkshops';
+import STEMLabSetup from './pages/solutions/STEMLabSetup';
+import ATLLabSetup from './pages/solutions/ATLLabSetup';
+import TeacherTraining from './pages/solutions/TeacherTraining';
+import YearLongCollaboration from './pages/solutions/YearLongCollaboration';
+import CompetitionsEvents from './pages/solutions/CompetitionsEvents';
+import SchoolDigitalSolutions from './pages/solutions/SchoolDigitalSolutions';
 
 
 import Navbar from './components/Navbar';
@@ -15,7 +23,6 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 import Home from './pages/Home';
 import About from './pages/About';
-import Solutions from './pages/Solutions';
 import ATLLabs from './pages/ATLLabs';
 import Projects from './pages/Projects';
 import ProjectDetail from './pages/ProjectDetail';
@@ -58,18 +65,29 @@ function App() {
       {/* Public site */}
       <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
       <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
-      <Route path="/solutions" element={<PublicLayout><Solutions /></PublicLayout>} />
+
+      {/* Solutions — Navbar + Footer on every page */}
+      <Route path="/solutions/curriculum-development" element={<PublicLayout><CurriculumDevelopment /></PublicLayout>} />
+      <Route path="/solutions/stem-robotics-workshops" element={<PublicLayout><STEMWorkshops /></PublicLayout>} />
+      <Route path="/solutions/stem-robotics-lab-setup" element={<PublicLayout><STEMLabSetup /></PublicLayout>} />
+      <Route path="/solutions/atl-lab-setup" element={<PublicLayout><ATLLabSetup /></PublicLayout>} />
+      <Route path="/solutions/teacher-training" element={<PublicLayout><TeacherTraining /></PublicLayout>} />
+      <Route path="/solutions/year-long-collaboration" element={<PublicLayout><YearLongCollaboration /></PublicLayout>} />
+      <Route path="/solutions/competitions-tech-events" element={<PublicLayout><CompetitionsEvents /></PublicLayout>} />
+      <Route path="/solutions/school-digital-solutions" element={<PublicLayout><SchoolDigitalSolutions /></PublicLayout>} />
+
       <Route path="/atl-labs" element={<PublicLayout><ATLLabs /></PublicLayout>} />
       <Route path="/projects" element={<PublicLayout><Projects /></PublicLayout>} />
       <Route path="/projects/:slug" element={<PublicLayout><ProjectDetail /></PublicLayout>} />
       <Route path="/kits" element={<PublicLayout><Kits /></PublicLayout>} />
-      <Route path="/kits/:slug" element={<PublicLayout><KitDetails /></PublicLayout>}/>
+      <Route path="/kits/:slug" element={<PublicLayout><KitDetails /></PublicLayout>} />
       <Route path="/gallery" element={<PublicLayout><Gallery /></PublicLayout>} />
       <Route path="/resources" element={<PublicLayout><Resources /></PublicLayout>} />
       <Route path="/resources/:slug" element={<PublicLayout><ResourceDetail /></PublicLayout>} />
       <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
       <Route path="/privacy-policy" element={<PublicLayout><Legal /></PublicLayout>} />
       <Route path="/terms" element={<PublicLayout><Legal /></PublicLayout>} />
+
 
       {/* Admin */}
       <Route path="/admin/login" element={<AdminLogin />} />

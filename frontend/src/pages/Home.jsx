@@ -89,10 +89,37 @@ const missions = [
   },
 ];
 
+
+const testimonials = [
+  {
+    quote:
+      "The hands-on STEM activities encouraged students to explore technology, collaborate, and think creatively.",
+    name: "Teacher Name",
+    role: "STEM Educator",
+    school: "School Name",
+  },
+  {
+    quote:
+      "The robotics sessions helped students understand concepts through practical projects and experimentation.",
+    name: "Teacher Name",
+    role: "Robotics Teacher",
+    school: "School Name",
+  },
+  {
+    quote:
+      "A practical approach to innovation that gives students opportunities to build, test, and improve their ideas.",
+    name: "School Representative",
+    role: "Academic Coordinator",
+    school: "School Name",
+  },
+];
+
+
 const Home = () => {
   const [projects, setProjects] = useState([]);
   const [impact, setImpact] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [testimonialIndex, setTestimonialIndex] = useState(0);
 
   useEffect(() => {
     Promise.all([
@@ -105,6 +132,16 @@ const Home = () => {
       })
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+  const interval = setInterval(() => {
+    setTestimonialIndex((current) =>
+      (current + 1) % testimonials.length
+    );
+  }, 5000);
+
+  return () => clearInterval(interval);
+}, []);
 
   return (
     <>
@@ -619,6 +656,8 @@ const Home = () => {
             bg-gray-200
             mx-2
           " />
+
+
 
 
           {/* Impact */}
@@ -2170,6 +2209,117 @@ const Home = () => {
 
   </div>
 </section>
+
+
+{/* TESTIMONIALS */}
+<section className="relative overflow-hidden bg-[#f8f9fa] py-10 sm:py-12 lg:py-14">
+  <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-orange-100/70 blur-3xl" />
+
+  <div className="relative mx-auto w-full max-w-6xl px-5 sm:px-8 lg:px-10">
+    {/* Heading */}
+    <div className="mx-auto mb-7 max-w-2xl text-center sm:mb-9">
+      <div className="mb-4 flex items-center justify-center gap-3">
+        <span className="h-0.5 w-10 bg-ignitron-orange" />
+        <p className="text-xs font-bold tracking-[2px] text-ignitron-orange sm:text-sm">
+          TESTIMONIALS
+        </p>
+        <span className="h-0.5 w-10 bg-ignitron-orange" />
+      </div>
+
+      <h2 className="text-2xl font-extrabold leading-tight text-ignitron-navy sm:text-3xl lg:text-4xl">
+        What Educators Say About{" "}
+        <span className="text-ignitron-orange">IGNITRON</span>
+      </h2>
+
+      <p className="mt-4 text-sm leading-7 text-gray-600 sm:text-base">
+        Hear from educators about hands-on learning, STEM
+        programs, and student innovation.
+      </p>
+    </div>
+
+    {/* Slider */}
+    <div className="mx-auto max-w-4xl">
+      <div
+        key={testimonialIndex}
+        className="rounded-2xl border border-gray-200 bg-white p-5 shadow-[0_10px_30px_rgba(0,0,0,0.04)] animate-[fadeIn_500ms_ease-out] sm:p-7 lg:p-8"
+      >
+        {/* Quote icon */}
+        <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-50 text-3xl font-bold text-ignitron-orange">
+          “
+        </div>
+
+        <p className="text-base font-medium leading-7 text-ignitron-navy sm:text-lg sm:leading-8">
+          {testimonials[testimonialIndex].quote}
+        </p>
+
+        <div className="mt-8 flex flex-col gap-5 border-t border-gray-100 pt-6 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h3 className="font-bold text-ignitron-navy">
+              {testimonials[testimonialIndex].name}
+            </h3>
+            <p className="mt-1 text-sm text-gray-500">
+              {testimonials[testimonialIndex].role}
+            </p>
+            <p className="mt-1 text-sm font-medium text-ignitron-orange">
+              {testimonials[testimonialIndex].school}
+            </p>
+          </div>
+
+          {/* Navigation */}
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              aria-label="Previous testimonial"
+              onClick={() =>
+                setTestimonialIndex((current) =>
+                  (current - 1 + testimonials.length) %
+                  testimonials.length
+                )
+              }
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-gray-200 text-xl text-ignitron-navy transition hover:border-orange-500 hover:bg-orange-500 hover:text-white"
+            >
+              ←
+            </button>
+
+            <div className="flex items-center gap-2 px-2">
+              {testimonials.map((item, index) => (
+                <button
+                  key={`${item.role}-${index}`}
+                  type="button"
+                  aria-label={`Show testimonial ${index + 1}`}
+                  onClick={() => setTestimonialIndex(index)}
+                  className={`h-2.5 rounded-full transition-all duration-300 ${
+                    testimonialIndex === index
+                      ? "w-8 bg-ignitron-orange"
+                      : "w-2.5 bg-gray-300 hover:bg-orange-300"
+                  }`}
+                />
+              ))}
+            </div>
+
+            <button
+              type="button"
+              aria-label="Next testimonial"
+              onClick={() =>
+                setTestimonialIndex((current) =>
+                  (current + 1) % testimonials.length
+                )
+              }
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-gray-200 text-xl text-ignitron-navy transition hover:border-orange-500 hover:bg-orange-500 hover:text-white"
+            >
+              →
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <p className="mt-5 text-center text-xs text-gray-400">
+        Educator experiences and feedback
+      </p>
+    </div>
+  </div>
+</section>
+
 
 {/* IMPACT */}
 {impact.length > 0 && (

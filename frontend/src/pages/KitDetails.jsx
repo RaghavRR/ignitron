@@ -138,6 +138,8 @@ const KitDetails = () => {
   const [error, setError] =
     useState('');
 
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+
   // ===================================================
   // FETCH KIT
   // ===================================================
@@ -146,6 +148,7 @@ const KitDetails = () => {
     const fetchKit = async () => {
       try {
         setLoading(true);
+        setSelectedImageIndex(0);
         setError('');
 
         const result =
@@ -225,10 +228,17 @@ const KitDetails = () => {
     );
   }
 
-  const imageUrl =
-    getKitImageUrl(
-      kit.image
-    );
+  const galleryImages = Array.from(
+  new Set([
+    ...(Array.isArray(kit.images) ? kit.images : []),
+    kit.image,
+  ].filter((image) => typeof image === 'string' && image.trim()))
+).map(getKitImageUrl);
+
+const imageUrl =
+  galleryImages[selectedImageIndex] ||
+  galleryImages[0] ||
+  defaultKitImage;
 
   const videoUrl =
     getYoutubeEmbedUrl(
@@ -285,45 +295,78 @@ const KitDetails = () => {
                 IMAGE
             ================================================== */}
 
-            <div className="w-full min-w-0">
+            
+<div className="w-full min-w-0">
+  {/* MAIN IMAGE */}
+  <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white">
+    <img
+      src={imageUrl}
+      alt={kit.name || 'STEM Kit'}
+      className="aspect-square w-full object-contain p-4 sm:aspect-[4/3] sm:p-6"
+      onError={(event) => {
+        event.currentTarget.onerror = null;
+        event.currentTarget.src = defaultKitImage;
+      }}
+    />
+  </div>
 
-              <div
-                className="
-                  w-full
-                  overflow-hidden
-                  rounded-2xl
-                  shadow-lg
-                  bg-gray-100
-                "
-              >
+  {/* IMAGE THUMBNAILS */}
+  {galleryImages.length > 1 && (
+    <div className="mt-4 flex gap-3 overflow-x-auto pb-2">
+      {galleryImages.map((src, index) => (
+        <button
+          key={`${index}-${src.slice(0, 30)}`}
+          type="button"
+          onClick={() => setSelectedImageIndex(index)}
+          aria-label={`View product image ${index + 1}`}
+          aria-pressed={selectedImageIndex === index}
+          className={`h-20 w-20 shrink-0 overflow-hidden rounded-xl border-2 bg-white transition sm:h-24 sm:w-24 ${
+            selectedImageIndex === index
+              ? 'border-orange-500 ring-2 ring-orange-100'
+              : 'border-gray-200 hover:border-orange-300'
+          }`}
+        >
+          <img
+            src={src}
+            alt={`${kit.name} view ${index + 1}`}
+            className="h-full w-full object-contain p-1"
+          />
+        </button>
+      ))}
+    </div>
+  )}
 
-                <img
-                  src={imageUrl}
-                  alt={
-                    kit.name ||
-                    'STEM Kit'
-                  }
-                  className="
-                    w-full
-                    aspect-[4/3]
-                    sm:aspect-[16/10]
-                    lg:aspect-[4/3]
-                    object-cover
-                  "
-                  onError={(event) => {
-                    if (
-                      event.currentTarget.src !==
-                      defaultKitImage
-                    ) {
-                      event.currentTarget.src =
-                        defaultKitImage;
-                    }
-                  }}
-                />
+  {galleryImages.length > 1 && (
+    <div className="mt-3 flex items-center justify-between gap-3">
+      <button
+        type="button"
+        disabled={selectedImageIndex === 0}
+        onClick={() =>
+          setSelectedImageIndex((index) => index - 1)
+        }
+        className="rounded-lg border px-4 py-2 text-sm disabled:opacity-40"
+      >
+        ← Previous
+      </button>
 
-              </div>
+      <span className="text-sm text-gray-500">
+        {selectedImageIndex + 1} / {galleryImages.length}
+      </span>
 
-            </div>
+      <button
+        type="button"
+        disabled={selectedImageIndex === galleryImages.length - 1}
+        onClick={() =>
+          setSelectedImageIndex((index) => index + 1)
+        }
+        className="rounded-lg border px-4 py-2 text-sm disabled:opacity-40"
+      >
+        Next →
+      </button>
+    </div>
+  )}
+</div>
+
 
             {/* =================================================
                 DETAILS

@@ -155,9 +155,13 @@ const AdminKits = () => {
                     <td className="p-4">
                       <div className="flex items-center gap-4">
                         <img
-                          src={kit.image}
+                          src={kit.image || kit.images?.[0]}
                           alt={kit.name}
-                          className="w-16 h-16 object-cover rounded-xl"
+                          className="h-16 w-16 rounded-xl object-cover"
+                          onError={(event) => {
+                            event.currentTarget.onerror = null;
+                            event.currentTarget.src = '/images/kits.jpeg';
+                          }}
                         />
 
                         <div>
@@ -167,6 +171,10 @@ const AdminKits = () => {
 
                           <p className="text-sm text-gray-500 max-w-[300px] truncate">
                             {kit.shortDescription}
+                          </p>
+
+                          <p className="mt-1 text-xs text-gray-500">
+                            {kit.images?.length || (kit.image ? 1 : 0)} product image(s)
                           </p>
                         </div>
                       </div>

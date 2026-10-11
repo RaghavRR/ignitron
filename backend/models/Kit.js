@@ -43,6 +43,15 @@ const kitSchema = new mongoose.Schema(
       trim: true,
     },
 
+    images: {
+      type: [String],
+      default: [],
+      validate: {
+        validator: (images) => images.length <= 5,
+        message: 'A kit can have a maximum of 5 images',
+      },
+    },
+
     videoUrl: {
       type: String,
       default: '',

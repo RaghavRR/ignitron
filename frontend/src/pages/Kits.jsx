@@ -179,13 +179,15 @@ const Kits = () => {
             kits.length > 0 && (
               <div
                 className="
-                  grid
-                  grid-cols-1
-                  sm:grid-cols-2
-                  xl:grid-cols-3
-                  gap-5
-                  sm:gap-6
-                  lg:gap-8
+                  flex
+                  gap-4
+                  overflow-x-auto
+                  snap-x
+                  snap-mandatory
+                  scroll-smooth
+                  pb-5
+                  sm:gap-5
+                  lg:gap-6
                 "
               >
                 {kits.map((kit) => {
@@ -205,6 +207,11 @@ const Kits = () => {
                         transition-shadow
                         flex
                         flex-col
+                        shrink-0
+                        w-[82%]
+                        sm:w-[calc(50%-10px)]
+                        lg:w-[calc(33.333%-16px)]
+                        snap-start
                       "
                     >
                       {/* IMAGE */}

@@ -157,6 +157,7 @@ const createKit = async (req, res) => {
       shortDescription,
       description,
       image,
+      images,
       videoUrl,
       price,
       originalPrice,
@@ -171,6 +172,31 @@ const createKit = async (req, res) => {
       isActive,
       sortOrder,
     } = req.body;
+
+    const kitImages = (
+  Array.isArray(images) && images.length
+    ? images
+    : image
+      ? [image]
+      : []
+).filter(
+  (item) => typeof item === 'string' && item.trim()
+);
+
+if (!kitImages.length) {
+  return res.status(400).json({
+    success: false,
+    message: 'At least one product image is required',
+  });
+}
+
+if (kitImages.length > 5) {
+  return res.status(400).json({
+    success: false,
+    message: 'Maximum 5 product images are allowed',
+  });
+}
+
 
     // ==========================================
     // REQUIRED FIELDS
@@ -369,7 +395,8 @@ const createKit = async (req, res) => {
       shortDescription: shortDescription.trim(),
       description: description.trim(),
 
-      image: image.trim(),
+      image: kitImages[0],
+      images: kitImages,
       videoUrl: videoUrl?.trim() || '',
 
       price: numericPrice,
@@ -448,6 +475,7 @@ const updateKit = async (req, res) => {
       shortDescription,
       description,
       image,
+      images,
       videoUrl,
       price,
       originalPrice,
@@ -499,10 +527,35 @@ const updateKit = async (req, res) => {
         ? description
         : kit.description;
 
-    kit.image =
-      image !== undefined
-        ? image
-        : kit.image;
+      if (images !== undefined) {
+    if (!Array.isArray(images) || images.length > 5) {
+      return res.status(400).json({
+        success: false,
+        message: 'Provide a valid array of up to 5 images',
+      });
+    }
+
+    const validImages = images.filter(
+      (item) => typeof item === 'string' && item.trim()
+    );
+
+    if (!validImages.length) {
+      return res.status(400).json({
+        success: false,
+        message: 'At least one product image is required',
+      });
+    }
+
+    kit.images = validImages;
+    kit.image = validImages[0];
+  } else if (image !== undefined) {
+    // Backward compatibility for existing clients.
+    kit.image = image;
+
+    if (!kit.images?.length) {
+      kit.images = image ? [image] : [];
+    }
+  }
 
     kit.videoUrl =
       videoUrl !== undefined

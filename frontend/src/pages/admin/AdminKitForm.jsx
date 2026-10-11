@@ -11,11 +11,51 @@ import {
   updateKit,
 } from '../../api/kits';
 
+const compressImageFile = async (file) => {
+  const bitmap = await createImageBitmap(file);
+
+  const maxDimension = 1200;
+  const scale = Math.min(
+    1,
+    maxDimension / Math.max(bitmap.width, bitmap.height)
+  );
+
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.round(bitmap.width * scale);
+  canvas.height = Math.round(bitmap.height * scale);
+
+  const context = canvas.getContext('2d');
+  context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close?.();
+
+  const blob = await new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (result) =>
+        result
+          ? resolve(result)
+          : reject(new Error('Image compression failed')),
+      'image/jpeg',
+      0.78
+    );
+  });
+
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(new Error('Unable to read image'));
+
+    reader.readAsDataURL(blob);
+  });
+};
+
+
 const initialForm = {
   name: '',
   shortDescription: '',
   description: '',
   image: '',
+  images: [],
   videoUrl: '',
   price: '',
   originalPrice: '',
@@ -65,6 +105,13 @@ const AdminKitForm = () => {
               kit.shortDescription || '',
             description: kit.description || '',
             image: kit.image || '',
+             images:
+                kit.images?.length > 0
+                  ? kit.images
+                  : kit.image
+                    ? [kit.image]
+                    : [],
+
             videoUrl: kit.videoUrl || '',
             price: kit.price ?? '',
             originalPrice:
@@ -121,62 +168,63 @@ const AdminKitForm = () => {
     }));
   };
 
-const handleImageDrop = (e) => {
-  e.preventDefault();
+const handleFiles = async (fileList) => {
+  const files = Array.from(fileList || []);
 
-  const file = e.dataTransfer.files?.[0];
+  if (!files.length) return;
 
-  if (!file || !file.type.startsWith('image/')) {
-    setError('Please upload a valid image file.');
+  if (files.some((file) => !file.type.startsWith('image/'))) {
+    setError('Please select valid image files.');
     return;
   }
 
-  const reader = new FileReader();
+  if (form.images.length + files.length > 5) {
+    setError('You can upload a maximum of 5 images.');
+    return;
+  }
 
-  reader.onload = () => {
-    const imageUrl = reader.result;
-
-    setImageFile(file);
-    setImagePreview(imageUrl);
-
-    setForm((prev) => ({
-      ...prev,
-      image: imageUrl,
-    }));
-
+  try {
     setError('');
-  };
 
-  reader.readAsDataURL(file);
+    const compressedImages = await Promise.all(
+      files.map(compressImageFile)
+    );
+
+    setForm((prev) => {
+      const merged = [...prev.images, ...compressedImages];
+
+      return {
+        ...prev,
+        images: merged,
+        image: merged[0] || '',
+      };
+    });
+  } catch (err) {
+    setError(err.message || 'Failed to process images.');
+  }
+};
+
+const handleImageDrop = (e) => {
+  e.preventDefault();
+  handleFiles(e.dataTransfer.files);
 };
 
 const handleImageSelect = (e) => {
-  const file = e.target.files?.[0];
-
-  if (!file || !file.type.startsWith('image/')) {
-    setError('Please upload a valid image file.');
-    return;
-  }
-
-  const reader = new FileReader();
-
-  reader.onload = () => {
-    const imageUrl = reader.result;
-
-    setImageFile(file);
-    setImagePreview(imageUrl);
-
-    setForm((prev) => ({
-      ...prev,
-      image: imageUrl,
-    }));
-
-    setError('');
-  };
-
-  reader.readAsDataURL(file);
+  handleFiles(e.target.files);
+  e.target.value = '';
 };
 
+const removeImage = (index) => {
+  setForm((prev) => {
+    const images = prev.images.filter((_, i) => i !== index);
+
+    return {
+      ...prev,
+      images,
+      image: images[0] || '',
+    };
+  });
+};
   // ==========================================
   // ARRAY INPUTS
   // ==========================================
@@ -244,9 +292,9 @@ const handleImageSelect = (e) => {
       return 'Description is required';
     }
 
-    if (!form.image.trim() && !imageFile) {
-      return 'Product image is required';
-    }
+if (!form.images.length && !form.image.trim()) {
+  return 'At least one product image is required';
+}
 
     if (
       form.price === '' ||
@@ -304,7 +352,12 @@ const handleImageSelect = (e) => {
         description:
           form.description.trim(),
 
-        image: form.image.trim(),
+        image: form.images[0] || form.image.trim(),
+        images: form.images.length
+          ? form.images
+          : form.image.trim()
+            ? [form.image.trim()]
+            : [],
 
         videoUrl:
           form.videoUrl.trim(),
@@ -466,56 +519,71 @@ const handleImageSelect = (e) => {
         {/* ================================= */}
 
         <FormSection title="Media">
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              Product Image *
-            </label>
+          
+<div>
+  <label className="mb-2 block text-sm font-medium">
+    Product Images * (Maximum 5)
+  </label>
 
-            <div
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={handleImageDrop}
-              onClick={() => document.getElementById('product-image').click()}
-              className="w-full min-h-48 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-black transition bg-gray-50"
-            >
-              {imagePreview ? (
-                <img
-                  src={imagePreview}
-                  alt="Product Preview"
-                  className="w-full max-w-md h-56 object-contain rounded-xl"
-                />
-              ) : form.image ? (
-                <img
-                  src={form.image}
-                  alt="Product Preview"
-                  className="w-full max-w-md h-56 object-contain rounded-xl"
-                />
-              ) : (
-                <>
-                  <div className="text-4xl mb-3">📁</div>
+  <div
+    onDragOver={(e) => e.preventDefault()}
+    onDrop={handleImageDrop}
+    className="rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-5 transition hover:border-orange-400"
+  >
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
+      {form.images.map((image, index) => (
+        <div
+          key={`${index}-${image.slice(0, 30)}`}
+          className="relative"
+        >
+          <img
+            src={image}
+            alt={`Product image ${index + 1}`}
+            className="h-28 w-full rounded-lg border bg-white object-contain"
+          />
 
-                  <p className="font-medium">
-                    Drag & Drop your image here
-                  </p>
+          <button
+            type="button"
+            onClick={() => removeImage(index)}
+            aria-label={`Remove image ${index + 1}`}
+            className="absolute right-1 top-1 rounded-full bg-red-600 px-2 py-1 text-xs font-bold text-white"
+          >
+            ✕
+          </button>
 
-                  <p className="text-sm text-gray-500 mt-1">
-                    or click to browse
-                  </p>
+          {index === 0 && (
+            <span className="mt-1 block text-center text-xs font-semibold text-orange-600">
+              Main image
+            </span>
+          )}
+        </div>
+      ))}
 
-                  <p className="text-xs text-gray-400 mt-2">
-                    PNG, JPG, JPEG, WEBP
-                  </p>
-                </>
-              )}
+      {form.images.length < 5 && (
+        <label className="flex min-h-28 cursor-pointer flex-col items-center justify-center rounded-lg border border-gray-200 bg-white p-3 text-center hover:border-orange-400">
+          <span className="text-3xl">+</span>
+          <span className="mt-1 text-xs font-medium">
+            Add images
+          </span>
 
-              <input
-                id="product-image"
-                type="file"
-                accept="image/png,image/jpeg,image/jpg,image/webp"
-                onChange={handleImageSelect}
-                className="hidden"
-              />
-            </div>
-          </div>
+          <input
+            type="file"
+            multiple
+            accept="image/png,image/jpeg,image/webp"
+            onChange={handleImageSelect}
+            className="hidden"
+          />
+        </label>
+      )}
+    </div>
+
+    <p className="mt-4 text-xs text-gray-500">
+      Drag images here or click Add images. The first image
+      is the main product image.
+    </p>
+  </div>
+</div>
+
 
           <Input
             label="Video URL"
