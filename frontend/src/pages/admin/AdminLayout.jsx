@@ -67,6 +67,11 @@ const links = [
     label: 'Leads',
     icon: <FiUsers />,
   },
+{
+  to: '/admin/testimonials',
+  label: 'Testimonials',
+  icon: <FiMessageSquare />,
+},
 ];
 
 const AdminLayout = () => {

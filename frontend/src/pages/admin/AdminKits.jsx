@@ -5,6 +5,7 @@ import {
   deleteKit,
   updateKit,
 } from '../../api/kits';
+import { getKitImageUrl } from '../../api/kits';
 
 const AdminKits = () => {
   const [kits, setKits] = useState([]);
@@ -155,7 +156,7 @@ const AdminKits = () => {
                     <td className="p-4">
                       <div className="flex items-center gap-4">
                         <img
-                          src={kit.image || kit.images?.[0]}
+                          src={getKitImageUrl(kit.image || kit.images?.[0])}
                           alt={kit.name}
                           className="h-16 w-16 rounded-xl object-cover"
                           onError={(event) => {

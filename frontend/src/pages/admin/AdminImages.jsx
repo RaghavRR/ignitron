@@ -24,7 +24,7 @@ const AdminImages = () => {
     const formData = new FormData();
     formData.append('image', file);
     try {
-      await api.put(`/images/${key}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+      await api.put(`/images/${key}`, formData);
       fetchImages();
     } catch (err) {
       alert(err.response?.data?.message || 'Upload failed');

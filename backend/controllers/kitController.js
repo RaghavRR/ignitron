@@ -1,5 +1,8 @@
 const Kit = require('../models/Kit');
 
+const getUploadedKitImageUrls = (req) => {
+  return (req.files || []).map((file) => `/uploads/${file.filename}`);
+};
 
 // ==========================================
 // VALIDATION HELPERS
@@ -152,28 +155,35 @@ const getKitBySlug = async (req, res) => {
 // ==========================================
 const createKit = async (req, res) => {
   try {
-    const {
-      name,
-      shortDescription,
-      description,
-      image,
-      images,
-      videoUrl,
-      price,
-      originalPrice,
-      features,
-      includedItems,
-      skills,
-      ageGroup,
-      classLevel,
-      category,
-      stock,
-      featured,
-      isActive,
-      sortOrder,
-    } = req.body;
 
-    const kitImages = (
+const body = req.body.kitData
+  ? JSON.parse(req.body.kitData)
+  : req.body;
+
+const {
+  name,
+  shortDescription,
+  description,
+  image,
+  images,
+  videoUrl,
+  price,
+  originalPrice,
+  features,
+  includedItems,
+  skills,
+  ageGroup,
+  classLevel,
+  category,
+  stock,
+  featured,
+  isActive,
+  sortOrder,
+} = body;
+
+const uploadedImages = getUploadedKitImageUrls(req);
+
+const existingImages = (
   Array.isArray(images) && images.length
     ? images
     : image
@@ -182,6 +192,11 @@ const createKit = async (req, res) => {
 ).filter(
   (item) => typeof item === 'string' && item.trim()
 );
+
+const kitImages = [
+  ...existingImages,
+  ...uploadedImages,
+].slice(0, 5);
 
 if (!kitImages.length) {
   return res.status(400).json({
@@ -223,13 +238,6 @@ if (kitImages.length > 5) {
       });
     }
 
-    if (!image?.trim()) {
-      return res.status(400).json({
-        success: false,
-        message: 'Product image is required',
-      });
-    }
-
     // ==========================================
     // LENGTH VALIDATION
     // ==========================================
@@ -257,16 +265,7 @@ if (kitImages.length > 5) {
       });
     }
 
-    // ==========================================
-    // IMAGE URL
-    // ==========================================
 
- if (!image?.trim()) {
-  return res.status(400).json({
-    success: false,
-    message: 'Product image is required',
-  });
-}
 
     // ==========================================
     // VIDEO URL
@@ -470,6 +469,10 @@ const updateKit = async (req, res) => {
       });
     }
 
+  const body = req.body.kitData
+  ? JSON.parse(req.body.kitData)
+  : req.body;
+
     const {
       name,
       shortDescription,
@@ -489,7 +492,9 @@ const updateKit = async (req, res) => {
       featured,
       isActive,
       sortOrder,
-    } = req.body;
+    } = body;
+  
+
 
     if (name !== undefined && !name.trim()) {
       return res.status(400).json({
@@ -527,35 +532,54 @@ const updateKit = async (req, res) => {
         ? description
         : kit.description;
 
-      if (images !== undefined) {
-    if (!Array.isArray(images) || images.length > 5) {
-      return res.status(400).json({
-        success: false,
-        message: 'Provide a valid array of up to 5 images',
-      });
-    }
+ const uploadedImages = getUploadedKitImageUrls(req);
 
-    const validImages = images.filter(
-      (item) => typeof item === 'string' && item.trim()
-    );
+if (uploadedImages.length > 0) {
+  const existingImages = (
+    Array.isArray(images) && images.length
+      ? images
+      : image
+        ? [image]
+        : []
+  ).filter(
+    (item) => typeof item === 'string' && item.trim()
+  );
 
-    if (!validImages.length) {
-      return res.status(400).json({
-        success: false,
-        message: 'At least one product image is required',
-      });
-    }
+  const validImages = [
+    ...existingImages,
+    ...uploadedImages,
+  ].slice(0, 5);
 
-    kit.images = validImages;
-    kit.image = validImages[0];
-  } else if (image !== undefined) {
-    // Backward compatibility for existing clients.
-    kit.image = image;
-
-    if (!kit.images?.length) {
-      kit.images = image ? [image] : [];
-    }
+  kit.images = validImages;
+  kit.image = validImages[0];
+} else if (images !== undefined) {
+  if (!Array.isArray(images) || images.length > 5) {
+    return res.status(400).json({
+      success: false,
+      message: 'Provide a valid array of up to 5 images',
+    });
   }
+
+  const validImages = images.filter(
+    (item) => typeof item === 'string' && item.trim()
+  );
+
+  if (!validImages.length) {
+    return res.status(400).json({
+      success: false,
+      message: 'At least one product image is required',
+    });
+  }
+
+  kit.images = validImages;
+  kit.image = validImages[0];
+} else if (image !== undefined) {
+  kit.image = image;
+
+  if (!kit.images?.length) {
+    kit.images = image ? [image] : [];
+  }
+}
 
     kit.videoUrl =
       videoUrl !== undefined

@@ -55,11 +55,45 @@ const Gallery = () => {
                   onClick={() => setLightbox(item)}
                   className="block w-full break-inside-avoid rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow"
                 >
-                  {item.type === 'video' ? (
-                    <video src={resolveAsset(item.mediaUrl)} className="w-full h-auto" muted />
-                  ) : (
-                    <img src={resolveAsset(item.mediaUrl)} alt={item.title} className="w-full h-auto" loading="lazy" />
-                  )}
+{item.type === 'video' ? (
+  <div className="relative w-full overflow-hidden rounded-xl bg-gray-950 group">
+    <video
+      src={resolveAsset(item.mediaUrl)}
+      className="w-full h-56 object-cover opacity-80 transition duration-300 group-hover:opacity-60"
+      muted
+      preload="metadata"
+      playsInline
+    />
+
+    <div className="absolute inset-0 flex items-center justify-center">
+      <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white/95 text-ignitron-orange shadow-lg transition-transform group-hover:scale-110">
+        <svg
+          viewBox="0 0 24 24"
+          className="h-7 w-7"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <path d="M8 5v14l11-7z" />
+        </svg>
+      </span>
+    </div>
+
+    <span className="absolute left-3 top-3 rounded-md bg-black/75 px-2 py-1 text-xs font-semibold uppercase tracking-wide text-white">
+      Video
+    </span>
+
+    <span className="absolute bottom-3 left-3 text-xs font-medium text-white">
+      Watch video
+    </span>
+  </div>
+) : (
+  <img
+    src={resolveAsset(item.mediaUrl)}
+    alt={item.title}
+    className="w-full h-auto transition duration-300 hover:scale-[1.02]"
+    loading="lazy"
+  />
+)}
                 </button>
               ))}
             </div>
@@ -74,7 +108,14 @@ const Gallery = () => {
         >
           <div className="max-w-4xl w-full" onClick={(e) => e.stopPropagation()}>
             {lightbox.type === 'video' ? (
-              <video src={resolveAsset(lightbox.mediaUrl)} controls autoPlay className="w-full rounded-xl max-h-[80vh]" />
+              <video
+  src={resolveAsset(lightbox.mediaUrl)}
+  controls
+  autoPlay
+  playsInline
+  preload="metadata"
+  className="w-full rounded-xl max-h-[80vh] bg-black"
+/>
             ) : (
               <img src={resolveAsset(lightbox.mediaUrl)} alt={lightbox.title} className="w-full rounded-xl max-h-[80vh] object-contain" />
             )}

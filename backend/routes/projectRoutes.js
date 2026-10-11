@@ -10,14 +10,22 @@ const {
   updateProject,
   deleteProject,
 } = require('../controllers/projectController');
+const optimizeImages = require('../middleware/optimizeImages');
 
 const cpUpload = upload.fields([{ name: 'coverImage', maxCount: 1 }, { name: 'circuitDiagram', maxCount: 1 }]);
 
 router.get('/', getProjects);
 router.get('/admin/all', protect, getProjectsAdmin);
 router.get('/:slug', getProjectBySlug);
-router.post('/', protect, cpUpload, createProject);
-router.put('/:id', protect, cpUpload, updateProject);
+router.post('/', protect, upload.fields([
+  { name: 'coverImage', maxCount: 1 },
+  { name: 'circuitDiagram', maxCount: 1 },
+]), optimizeImages, createProject);
+
+router.put('/:id', protect, upload.fields([
+  { name: 'coverImage', maxCount: 1 },
+  { name: 'circuitDiagram', maxCount: 1 },
+]), optimizeImages, updateProject);
 router.delete('/:id', protect, deleteProject);
 
 module.exports = router;

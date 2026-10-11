@@ -34,8 +34,11 @@ const AdminResourceForm = () => {
     if (coverImage) fd.append('coverImage', coverImage);
     if (file) fd.append('file', file);
     try {
-      if (isEdit) await api.put(`/resources/${id}`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-      else await api.post('/resources', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      if (isEdit) {
+  await api.put(`/resources/${id}`, fd);
+} else {
+  await api.post('/resources', fd);
+}
       navigate('/admin/resources');
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to save');
@@ -58,7 +61,12 @@ const AdminResourceForm = () => {
         <textarea required placeholder="Full content" rows="8" className="input" value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} />
         <div>
           <label className="text-sm font-semibold">Cover Image</label>
-          <input type="file" accept="image/*" className="input mt-1" onChange={(e) => setCoverImage(e.target.files[0])} />
+          <input
+  type="file"
+  accept="image/jpeg,image/png,image/webp"
+  className="input mt-1"
+  onChange={(e) => setCoverImage(e.target.files[0])}
+/>
         </div>
         <div>
           <label className="text-sm font-semibold">Downloadable File (PDF etc, optional)</label>

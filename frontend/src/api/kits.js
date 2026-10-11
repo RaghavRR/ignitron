@@ -1,154 +1,144 @@
+
 const RAW_API_URL =
   import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const API_URL = RAW_API_URL.replace(/\/+$/, '');
 
+export const getKitImageUrl = (image) => {
+  if (!image) return '';
+
+  if (
+    image.startsWith('data:') ||
+    /^https?:\/\//i.test(image)
+  ) {
+    return image;
+  }
+
+  const apiOrigin = API_URL.replace(/\/api\/?$/, '');
+
+  return `${apiOrigin}/${image.replace(/^\/+/, '')}`;
+};
+
 const API_BASE = API_URL.endsWith('/api')
   ? API_URL
   : `${API_URL}/api`;
-
-// ==========================================
-// AUTH HEADERS
-// ==========================================
 
 const getHeaders = () => {
   const token = localStorage.getItem('ignitron_admin_token');
 
   return {
     'Content-Type': 'application/json',
-    ...(token
-      ? {
-          Authorization: `Bearer ${token}`,
-        }
-      : {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 };
 
-// ==========================================
-// PUBLIC
-// ==========================================
+// Headers for FormData requests.
+// Do not set Content-Type manually for FormData;
+// fetch will automatically add the multipart boundary.
+const getFormDataHeaders = () => {
+  const token = localStorage.getItem('ignitron_admin_token');
 
-export const getPublicKits = async () => {
-  const response = await fetch(`${API_BASE}/kits`);
+  return {
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+};
 
-  const data = await response.json();
+// Helper for handling API responses
+const handleResponse = async (response, fallbackMessage) => {
+  const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    throw new Error(
-      data.message || 'Failed to fetch kits'
-    );
+    throw new Error(data.message || fallbackMessage);
   }
 
   return data;
 };
 
+// Get all public kits
+export const getPublicKits = async () => {
+  const response = await fetch(`${API_BASE}/kits`, {
+    method: 'GET',
+    credentials: 'include',
+  });
+
+  return handleResponse(response, 'Failed to fetch kits');
+};
+
+// Get a public kit by slug
 export const getKitBySlug = async (slug) => {
   const response = await fetch(
-    `${API_BASE}/kits/slug/${encodeURIComponent(slug)}`
-  );
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(
-      data.message || 'Kit not found'
-    );
-  }
-
-  return data;
-};
-
-// ==========================================
-// ADMIN
-// ==========================================
-
-export const getAdminKits = async () => {
-  const response = await fetch(
-    `${API_BASE}/kits/admin`,
+    `${API_BASE}/kits/slug/${encodeURIComponent(slug)}`,
     {
-      headers: getHeaders(),
+      method: 'GET',
       credentials: 'include',
     }
   );
 
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(
-      data.message || 'Failed to fetch kits'
-    );
-  }
-
-  return data;
+  return handleResponse(response, 'Failed to fetch kit');
 };
 
+// Get all kits for admin
+export const getAdminKits = async () => {
+  const response = await fetch(`${API_BASE}/kits/admin`, {
+    method: 'GET',
+    headers: getHeaders(),
+    credentials: 'include',
+  });
+
+  return handleResponse(response, 'Failed to fetch admin kits');
+};
+
+// Get a kit by ID
 export const getKitById = async (id) => {
   const response = await fetch(
-    `${API_BASE}/kits/${id}`,
+    `${API_BASE}/kits/${encodeURIComponent(id)}`,
     {
+      method: 'GET',
       headers: getHeaders(),
       credentials: 'include',
     }
   );
 
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(
-      data.message || 'Kit not found'
-    );
-  }
-
-  return data;
+  return handleResponse(response, 'Failed to fetch kit');
 };
 
+// Create a kit
+// Supports both JSON objects and FormData
 export const createKit = async (kitData) => {
-  const response = await fetch(
-    `${API_BASE}/kits`,
-    {
-      method: 'POST',
-      headers: getHeaders(),
-      credentials: 'include',
-      body: JSON.stringify(kitData),
-    }
-  );
+  const isFormData = kitData instanceof FormData;
 
-  const data = await response.json();
+  const response = await fetch(`${API_BASE}/kits`, {
+    method: 'POST',
+    headers: isFormData ? getFormDataHeaders() : getHeaders(),
+    credentials: 'include',
+    body: isFormData ? kitData : JSON.stringify(kitData),
+  });
 
-  if (!response.ok) {
-    throw new Error(
-      data.message || 'Failed to create kit'
-    );
-  }
-
-  return data;
+  return handleResponse(response, 'Failed to create kit');
 };
 
+// Update a kit
+// Supports both JSON objects and FormData
 export const updateKit = async (id, kitData) => {
+  const isFormData = kitData instanceof FormData;
+
   const response = await fetch(
-    `${API_BASE}/kits/${id}`,
+    `${API_BASE}/kits/${encodeURIComponent(id)}`,
     {
       method: 'PUT',
-      headers: getHeaders(),
+      headers: isFormData ? getFormDataHeaders() : getHeaders(),
       credentials: 'include',
-      body: JSON.stringify(kitData),
+      body: isFormData ? kitData : JSON.stringify(kitData),
     }
   );
 
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(
-      data.message || 'Failed to update kit'
-    );
-  }
-
-  return data;
+  return handleResponse(response, 'Failed to update kit');
 };
 
+// Delete a kit
 export const deleteKit = async (id) => {
   const response = await fetch(
-    `${API_BASE}/kits/${id}`,
+    `${API_BASE}/kits/${encodeURIComponent(id)}`,
     {
       method: 'DELETE',
       headers: getHeaders(),
@@ -156,13 +146,5 @@ export const deleteKit = async (id) => {
     }
   );
 
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(
-      data.message || 'Failed to delete kit'
-    );
-  }
-
-  return data;
+  return handleResponse(response, 'Failed to delete kit');
 };

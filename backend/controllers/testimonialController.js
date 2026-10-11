@@ -3,12 +3,24 @@ const fs = require('fs');
 const path = require('path');
 
 const unlinkIfLocal = (url) => {
-  if (url && url.startsWith('/uploads/')) {
-    const p = path.join(__dirname, '..', url.replace('/uploads/', 'uploads/'));
-    if (fs.existsSync(p)) fs.unlink(p, () => {});
-  }
-};
+  if (!url || !url.startsWith('/uploads/')) return;
 
+  const filePath = path.join(
+    __dirname,
+    '..',
+    url.replace(/^\/uploads\//, 'uploads/')
+  );
+
+  fs.unlink(filePath, (err) => {
+    if (err && err.code !== 'ENOENT') {
+      console.error(
+        'Failed to delete old testimonial image:',
+        err.code,
+        err.message
+      );
+    }
+  });
+};
 const getTestimonials = async (req, res) => {
   const items = await Testimonial.find({ isPublished: true }).sort({ createdAt: -1 });
   res.json(items);
@@ -20,10 +32,23 @@ const getTestimonialsAdmin = async (req, res) => {
 };
 
 const createTestimonial = async (req, res) => {
-  const data = { ...req.body };
-  if (req.file) data.photo = `/uploads/${req.file.filename}`;
-  const item = await Testimonial.create(data);
-  res.status(201).json(item);
+  try {
+    const data = { ...req.body };
+
+    if (req.file) {
+      data.photo = `/uploads/${req.file.filename}`;
+    }
+
+    const item = await Testimonial.create(data);
+
+    return res.status(201).json(item);
+  } catch (error) {
+    console.error('Create testimonial error:', error);
+
+    return res.status(500).json({
+      message: error.message || 'Failed to create testimonial',
+    });
+  }
 };
 
 const updateTestimonial = async (req, res) => {

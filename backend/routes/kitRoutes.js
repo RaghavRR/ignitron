@@ -1,6 +1,8 @@
 const express = require('express');
 
 const router = express.Router();
+const upload = require('../middleware/upload');
+const optimizeImages = require('../middleware/optimizeImages');
 
 const {
   getPublicKits,
@@ -34,11 +36,21 @@ router.get('/admin', protect, getAdminKits);
 // Get single kit
 router.get('/:id', protect, getKitById);
 
-// Create
-router.post('/', protect, createKit);
+router.post(
+  '/',
+  protect,
+  upload.array('imageFiles', 5),
+  optimizeImages,
+  createKit
+);
 
-// Update
-router.put('/:id', protect, updateKit);
+router.put(
+  '/:id',
+  protect,
+  upload.array('imageFiles', 5),
+  optimizeImages,
+  updateKit
+);
 
 // Delete
 router.delete('/:id', protect, deleteKit);

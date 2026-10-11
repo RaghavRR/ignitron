@@ -27,7 +27,7 @@ const AdminGallery = () => {
     Object.entries(form).forEach(([k, v]) => fd.append(k, v));
     fd.append('media', file);
     try {
-      await api.post('/gallery', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      await api.post('/gallery', fd);
       setForm({ title: '', category: categories[0], caption: '', type: 'image' });
       setFile(null);
       fetchItems();

@@ -27,53 +27,47 @@ const storage = multer.diskStorage({
 const fileFilter = (req, file, cb) => {
   const ext = path.extname(file.originalname).toLowerCase();
 
-  // Downloadable file → PDF only
+  // Downloadable file: PDF only
   if (file.fieldname === 'file') {
-    if (
-      ext === '.pdf' &&
-      file.mimetype === 'application/pdf'
-    ) {
+    if (ext === '.pdf' && file.mimetype === 'application/pdf') {
       return cb(null, true);
     }
 
-    return cb(new Error('Only PDF files are allowed for downloadable file'));
+    return cb(new Error('Only PDF files are allowed'));
   }
 
-  // Cover image → image/video
-  if (file.fieldname === 'coverImage') {
-    const allowedExtensions = [
-      '.jpeg',
-      '.jpg',
-      '.png',
-      '.webp',
-      '.gif',
-      '.svg',
-      '.mp4',
-      '.webm',
-    ];
+  // Supported image/video upload fields
+const mediaFields = [
+  'image',
+  'imageFiles',
+  'media',
+  'coverImage',
+  'circuitDiagram',
+  'photo',
+];
 
-    const allowedMimeTypes = [
-      'image/jpeg',
-      'image/jpg',
-      'image/png',
-      'image/webp',
-      'image/gif',
-      'image/svg+xml',
-      'video/mp4',
-      'video/webm',
-    ];
-
-    if (
-      allowedExtensions.includes(ext) &&
-      allowedMimeTypes.includes(file.mimetype)
-    ) {
-      return cb(null, true);
-    }
-
-    return cb(new Error('Only image/video files are allowed for cover image'));
+  if (!mediaFields.includes(file.fieldname)) {
+    return cb(new Error('Invalid file field'));
   }
 
-  cb(new Error('Invalid file field'));
+  const allowedTypes = {
+    '.jpg': ['image/jpeg'],
+    '.jpeg': ['image/jpeg'],
+    '.png': ['image/png'],
+    '.webp': ['image/webp'],
+    '.gif': ['image/gif'],
+    '.svg': ['image/svg+xml'],
+    '.mp4': ['video/mp4'],
+    '.webm': ['video/webm'],
+  };
+
+  const validMimes = allowedTypes[ext];
+
+  if (!validMimes || !validMimes.includes(file.mimetype)) {
+    return cb(new Error('Unsupported image or video format'));
+  }
+
+  cb(null, true);
 };
 
 const upload = multer({

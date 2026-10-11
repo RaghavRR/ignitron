@@ -60,11 +60,9 @@ const updateProject = async (req, res) => {
 
   const data = { ...req.body };
   if (req.files?.coverImage) {
-    unlinkIfLocal(project.coverImage);
     data.coverImage = `/uploads/${req.files.coverImage[0].filename}`;
   }
   if (req.files?.circuitDiagram) {
-    unlinkIfLocal(project.circuitDiagram);
     data.circuitDiagram = `/uploads/${req.files.circuitDiagram[0].filename}`;
   }
   ['technologies', 'skills', 'whatYouLearn', 'howToMake', 'upgradeIdeas', 'components', 'troubleshooting'].forEach((f) => {

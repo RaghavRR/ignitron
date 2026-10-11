@@ -26,10 +26,25 @@ const ResourceDetail = () => {
         )}
         <div className="prose max-w-none text-gray-700 whitespace-pre-line leading-relaxed">{resource.content}</div>
         {resource.fileUrl && (
-          <a href={resolveAsset(resource.fileUrl)} target="_blank" rel="noopener noreferrer" className="btn-primary mt-8 inline-flex">
-            Download Resource
-          </a>
-        )}
+  /\.(mp4|webm|ogg)(\?.*)?$/i.test(resource.fileUrl) ? (
+    <video
+      src={resolveAsset(resource.fileUrl)}
+      controls
+      playsInline
+      preload="metadata"
+      className="w-full rounded-xl mt-8 max-h-[70vh] bg-black"
+    />
+  ) : (
+    <a
+      href={resolveAsset(resource.fileUrl)}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="btn-primary mt-8 inline-flex"
+    >
+      Download Resource
+    </a>
+  )
+)}
       </div>
     </article>
   );

@@ -15,7 +15,7 @@ import YearLongCollaboration from './pages/solutions/YearLongCollaboration';
 import CompetitionsEvents from './pages/solutions/CompetitionsEvents';
 import SchoolDigitalSolutions from './pages/solutions/SchoolDigitalSolutions';
 
-
+import AdminTestimonials from "./pages/admin/AdminTestimonials";
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import WhatsAppFloat from './components/WhatsAppFloat';
@@ -109,7 +109,10 @@ function App() {
         <Route path="resources" element={<AdminResources />} />
         <Route path="resources/new" element={<AdminResourceForm />} />
         <Route path="resources/:id/edit" element={<AdminResourceForm />} />
-
+        <Route
+        path="/admin/testimonials"
+        element={<AdminTestimonials />}
+      />
         <Route path="kits" element={<AdminKits />} />
 <Route path="kits/new" element={<AdminKitForm />} />
 <Route path="kits/:id/edit" element={<AdminKitForm />} />

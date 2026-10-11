@@ -30,9 +30,28 @@ const AdminProjectForm = () => {
     api.get(`/projects/admin/all`).then(({ data }) => {
       const p = data.find((pr) => pr._id === id);
       if (p) {
-        setForm(p);
-        setExisting(p);
-      }
+  setForm({
+    ...emptyProject,
+    ...p,
+    technologies: Array.isArray(p.technologies)
+      ? p.technologies
+      : typeof p.technologies === 'string'
+        ? p.technologies.split(',').map((s) => s.trim()).filter(Boolean)
+        : [],
+    skills: Array.isArray(p.skills)
+      ? p.skills
+      : typeof p.skills === 'string'
+        ? p.skills.split(',').map((s) => s.trim()).filter(Boolean)
+        : [],
+    whatYouLearn: Array.isArray(p.whatYouLearn) ? p.whatYouLearn : [],
+    howToMake: Array.isArray(p.howToMake) ? p.howToMake : [],
+    upgradeIdeas: Array.isArray(p.upgradeIdeas) ? p.upgradeIdeas : [],
+    components: Array.isArray(p.components) ? p.components : [],
+    troubleshooting: Array.isArray(p.troubleshooting) ? p.troubleshooting : [],
+  });
+
+  setExisting(p);
+}
       setLoading(false);
     });
   }, [id]);
@@ -88,7 +107,7 @@ const AdminProjectForm = () => {
   return (
     <div>
       <h1 className="text-2xl font-bold text-ignitron-navy mb-8">{isEdit ? 'Edit Project' : 'Add New Project'}</h1>
-      <form onSubmit={handleSubmit} className="bg-white rounded-xl p-8 border border-gray-100 space-y-6 max-w-3xl">
+      <form onSubmit={handleSubmit} className="bg-white rounded-xl p-4 sm:p-8 border border-gray-100 space-y-6 w-full max-w-3xl min-w-0">
         <div>
           <label className="text-sm font-semibold">Title</label>
           <input required className="input mt-1" value={form.title} onChange={(e) => handleChange('title', e.target.value)} />
@@ -121,18 +140,55 @@ const AdminProjectForm = () => {
 
         <div>
           <label className="text-sm font-semibold">Cover Image</label>
-          {existing?.coverImage && <img src={resolveAsset(existing.coverImage)} alt="cover" className="w-32 h-20 object-cover rounded-lg my-2" />}
-          <input type="file" accept="image/*" className="mt-1" onChange={(e) => setCoverImage(e.target.files[0])} required={!isEdit} />
+         {existing?.coverImage && (
+  <img
+    src={resolveAsset(existing.coverImage)}
+    alt="cover"
+    className="w-32 h-20 object-cover rounded-lg my-2"
+  />
+)}
+<input
+  type="file"
+  accept="image/*"
+  className="mt-1"
+  onChange={(e) => setCoverImage(e.target.files[0])}
+  required={!isEdit}
+/>
         </div>
 
         <div>
-          <label className="text-sm font-semibold">Technologies (comma separated)</label>
-          <input className="input mt-1" value={(form.technologies || []).join(', ')} onChange={(e) => handleChange('technologies', e.target.value.split(',').map((s) => s.trim()).filter(Boolean))} />
-        </div>
-        <div>
-          <label className="text-sm font-semibold">Skills (comma separated)</label>
-          <input className="input mt-1" value={(form.skills || []).join(', ')} onChange={(e) => handleChange('skills', e.target.value.split(',').map((s) => s.trim()).filter(Boolean))} />
-        </div>
+  <label className="text-sm font-semibold">
+    Technologies (comma separated)
+  </label>
+  <input
+    className="input mt-1 w-full min-w-0"
+    value={(form.technologies || []).join(', ')}
+    onChange={(e) =>
+      handleChange(
+        'technologies',
+        e.target.value.split(',').map((s) => s.trim()).filter(Boolean)
+      )
+    }
+    placeholder="Arduino, ESP32, IoT"
+  />
+</div>
+
+<div>
+  <label className="text-sm font-semibold">
+    Skills (comma separated)
+  </label>
+  <input
+    className="input mt-1 w-full min-w-0"
+    value={(form.skills || []).join(', ')}
+    onChange={(e) =>
+      handleChange(
+        'skills',
+        e.target.value.split(',').map((s) => s.trim()).filter(Boolean)
+      )
+    }
+    placeholder="Electronics, Programming, Robotics"
+  />
+</div>
 
         <div>
           <label className="text-sm font-semibold">What You'll Learn (one per line)</label>
@@ -153,7 +209,13 @@ const AdminProjectForm = () => {
 
         <div>
           <label className="text-sm font-semibold">Circuit / Wiring Diagram (optional)</label>
-          {existing?.circuitDiagram && <img src={resolveAsset(existing.circuitDiagram)} alt="circuit" className="w-32 h-20 object-cover rounded-lg my-2" />}
+          {existing?.circuitDiagram && (
+  <img
+    src={resolveAsset(existing.circuitDiagram)}
+    alt="circuit"
+    className="w-32 h-20 object-cover rounded-lg my-2"
+  />
+)}
           <input type="file" accept="image/*" className="mt-1" onChange={(e) => setCircuitDiagram(e.target.files[0])} />
         </div>
 

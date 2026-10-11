@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from "react";
+import api, { resolveAsset } from "../api/axios";
 import { Link } from 'react-router-dom';
 import { BiBookOpen, BiCog, BiBulb, BiRocket } from 'react-icons/bi';
 import { FaRobot, FaBrain, FaWifi, FaSeedling, FaLightbulb, FaBuilding } from 'react-icons/fa';
@@ -10,7 +11,6 @@ import {
   FiBookOpen,
   FiArrowRight
 } from "react-icons/fi";
-import api from '../api/axios';
 import EditableImage from '../components/EditableImage';
 import SectionHeader from '../components/SectionHeader';
 import ProjectCard from '../components/ProjectCard';
@@ -90,37 +90,15 @@ const missions = [
 ];
 
 
-const testimonials = [
-  {
-    quote:
-      "The hands-on STEM activities encouraged students to explore technology, collaborate, and think creatively.",
-    name: "Teacher Name",
-    role: "STEM Educator",
-    school: "School Name",
-  },
-  {
-    quote:
-      "The robotics sessions helped students understand concepts through practical projects and experimentation.",
-    name: "Teacher Name",
-    role: "Robotics Teacher",
-    school: "School Name",
-  },
-  {
-    quote:
-      "A practical approach to innovation that gives students opportunities to build, test, and improve their ideas.",
-    name: "School Representative",
-    role: "Academic Coordinator",
-    school: "School Name",
-  },
-];
-
-
 const Home = () => {
   const [projects, setProjects] = useState([]);
   const [impact, setImpact] = useState([]);
   const [loading, setLoading] = useState(true);
   const [testimonialIndex, setTestimonialIndex] = useState(0);
-
+  const [testimonials, setTestimonials] = useState([]);
+  const testimonialTrackRef = useRef(null);
+const testimonialPausedRef = useRef(false);
+  
   useEffect(() => {
     Promise.all([
       api.get('/projects', { params: { featured: 'true' } }),
@@ -133,14 +111,68 @@ const Home = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  useEffect(() => {
+  
+
+
+useEffect(() => {
+  const track = testimonialTrackRef.current;
+  if (!track || testimonials.length < 2) return;
+
+  let frameId;
+  let previousTime = 0;
+
+  const animate = (time) => {
+    if (!track.isConnected) return;
+
+    if (!previousTime) previousTime = time;
+    const delta = Math.min(time - previousTime, 50);
+    previousTime = time;
+
+    if (!testimonialPausedRef.current) {
+      const duplicateStart = track.children[testimonials.length];
+
+      if (duplicateStart) {
+        const loopWidth = duplicateStart.offsetLeft;
+
+        if (loopWidth > 0) {
+          track.scrollLeft += delta * 0.035;
+
+          if (track.scrollLeft >= loopWidth) {
+            track.scrollLeft -= loopWidth;
+          }
+        }
+      }
+    }
+
+    frameId = requestAnimationFrame(animate);
+  };
+
+  frameId = requestAnimationFrame(animate);
+
+  return () => cancelAnimationFrame(frameId);
+}, [testimonials.length]);
+
+
+useEffect(() => {
+  if (testimonials.length < 2) return;
+
   const interval = setInterval(() => {
-    setTestimonialIndex((current) =>
-      (current + 1) % testimonials.length
-    );
+    setTestimonialIndex((current) => (current + 1) % testimonials.length);
   }, 5000);
 
   return () => clearInterval(interval);
+}, [testimonials.length]);
+
+useEffect(() => {
+  api
+    .get("/testimonials")
+    .then(({ data }) => {
+      setTestimonials(Array.isArray(data) ? data : []);
+    })
+    .catch((err) => {
+      console.error("Testimonials fetch failed:", err);
+      setTestimonials([]);
+    });
 }, []);
 
   return (
@@ -2211,114 +2243,110 @@ const Home = () => {
 </section>
 
 
+
 {/* TESTIMONIALS */}
-<section className="relative overflow-hidden bg-[#f8f9fa] py-10 sm:py-12 lg:py-14">
-  <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-orange-100/70 blur-3xl" />
+<section className="overflow-hidden bg-[#f8f9fa] py-12 sm:py-16">
+  <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
 
-  <div className="relative mx-auto w-full max-w-6xl px-5 sm:px-8 lg:px-10">
     {/* Heading */}
-    <div className="mx-auto mb-7 max-w-2xl text-center sm:mb-9">
-      <div className="mb-4 flex items-center justify-center gap-3">
-        <span className="h-0.5 w-10 bg-ignitron-orange" />
-        <p className="text-xs font-bold tracking-[2px] text-ignitron-orange sm:text-sm">
-          TESTIMONIALS
-        </p>
-        <span className="h-0.5 w-10 bg-ignitron-orange" />
-      </div>
+    <div className="mb-8 text-center sm:mb-10">
+      <p className="mb-3 text-xs font-bold tracking-[2px] text-ignitron-orange">
+        TESTIMONIALS
+      </p>
 
-      <h2 className="text-2xl font-extrabold leading-tight text-ignitron-navy sm:text-3xl lg:text-4xl">
+      <h2 className="text-2xl font-extrabold text-ignitron-navy sm:text-3xl lg:text-4xl">
         What Educators Say About{" "}
         <span className="text-ignitron-orange">IGNITRON</span>
       </h2>
 
-      <p className="mt-4 text-sm leading-7 text-gray-600 sm:text-base">
-        Hear from educators about hands-on learning, STEM
-        programs, and student innovation.
+      <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-gray-600 sm:text-base">
+        Hear from educators about hands-on learning, STEM programs,
+        and student innovation.
       </p>
     </div>
 
-    {/* Slider */}
-    <div className="mx-auto max-w-4xl">
+    {/* Auto-scrolling cards */}
+    {testimonials.length > 0 && (
       <div
-        key={testimonialIndex}
-        className="rounded-2xl border border-gray-200 bg-white p-5 shadow-[0_10px_30px_rgba(0,0,0,0.04)] animate-[fadeIn_500ms_ease-out] sm:p-7 lg:p-8"
+        ref={testimonialTrackRef}
+        className="flex gap-4 overflow-x-auto"
+        style={{
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+          scrollBehavior: "auto",
+        }}
+        onMouseEnter={() => {
+          testimonialPausedRef.current = true;
+        }}
+        onMouseLeave={() => {
+          testimonialPausedRef.current = false;
+        }}
+        onTouchStart={() => {
+          testimonialPausedRef.current = true;
+        }}
+        onTouchEnd={() => {
+          testimonialPausedRef.current = false;
+        }}
       >
-        {/* Quote icon */}
-        <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-50 text-3xl font-bold text-ignitron-orange">
-          “
-        </div>
-
-        <p className="text-base font-medium leading-7 text-ignitron-navy sm:text-lg sm:leading-8">
-          {testimonials[testimonialIndex].quote}
-        </p>
-
-        <div className="mt-8 flex flex-col gap-5 border-t border-gray-100 pt-6 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h3 className="font-bold text-ignitron-navy">
-              {testimonials[testimonialIndex].name}
-            </h3>
-            <p className="mt-1 text-sm text-gray-500">
-              {testimonials[testimonialIndex].role}
-            </p>
-            <p className="mt-1 text-sm font-medium text-ignitron-orange">
-              {testimonials[testimonialIndex].school}
-            </p>
-          </div>
-
-          {/* Navigation */}
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              aria-label="Previous testimonial"
-              onClick={() =>
-                setTestimonialIndex((current) =>
-                  (current - 1 + testimonials.length) %
-                  testimonials.length
-                )
-              }
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-gray-200 text-xl text-ignitron-navy transition hover:border-orange-500 hover:bg-orange-500 hover:text-white"
-            >
-              ←
-            </button>
-
-            <div className="flex items-center gap-2 px-2">
-              {testimonials.map((item, index) => (
-                <button
-                  key={`${item.role}-${index}`}
-                  type="button"
-                  aria-label={`Show testimonial ${index + 1}`}
-                  onClick={() => setTestimonialIndex(index)}
-                  className={`h-2.5 rounded-full transition-all duration-300 ${
-                    testimonialIndex === index
-                      ? "w-8 bg-ignitron-orange"
-                      : "w-2.5 bg-gray-300 hover:bg-orange-300"
-                  }`}
+        {[...testimonials, ...testimonials].map((item, index) => (
+          <article
+            key={`${item._id || item.name}-${index}`}
+            className="w-[260px] flex-none overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm sm:w-[285px] lg:w-[300px]"
+          >
+            {/* Photo */}
+            <div className="flex h-44 items-center justify-center bg-gray-50 p-3">
+              {item.photo ? (
+                <img
+                  src={resolveAsset(item.photo)}
+                  alt={item.name}
+                  loading="lazy"
+                  className="h-full w-full object-contain"
                 />
-              ))}
+              ) : (
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-orange-100 text-2xl font-bold text-orange-600">
+                  {item.name?.charAt(0)?.toUpperCase() || "T"}
+                </div>
+              )}
             </div>
 
-            <button
-              type="button"
-              aria-label="Next testimonial"
-              onClick={() =>
-                setTestimonialIndex((current) =>
-                  (current + 1) % testimonials.length
-                )
-              }
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-gray-200 text-xl text-ignitron-navy transition hover:border-orange-500 hover:bg-orange-500 hover:text-white"
-            >
-              →
-            </button>
-          </div>
-        </div>
-      </div>
+            {/* Content */}
+            <div className="flex min-h-[190px] flex-col p-4">
+              <span className="mb-1 text-3xl font-bold leading-none text-sky-200">
+                “
+              </span>
 
-      <p className="mt-5 text-center text-xs text-gray-400">
-        Educator experiences and feedback
+              <p className="mb-4 line-clamp-4 break-words text-sm leading-6 text-gray-600">
+                {item.message}
+              </p>
+
+              <div className="mt-auto border-t border-gray-100 pt-3">
+                <h3 className="text-sm font-bold text-ignitron-navy">
+                  {item.name}
+                </h3>
+
+                <p className="mt-1 text-xs text-gray-500">
+                  {item.designation}
+                </p>
+
+                <p className="mt-1 text-xs font-medium text-orange-600">
+                  {item.institution}
+                </p>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    )}
+
+    {testimonials.length === 0 && (
+      <p className="py-8 text-center text-sm text-gray-500">
+        No testimonials available yet.
       </p>
-    </div>
+    )}
+
   </div>
 </section>
+
 
 
 {/* IMPACT */}

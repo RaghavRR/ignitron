@@ -10,45 +10,50 @@ import {
   getKitById,
   updateKit,
 } from '../../api/kits';
+import { getKitImageUrl } from '../../api/kits';
 
 const compressImageFile = async (file) => {
   const bitmap = await createImageBitmap(file);
 
-  const maxDimension = 1200;
-  const scale = Math.min(
-    1,
-    maxDimension / Math.max(bitmap.width, bitmap.height)
-  );
-
-  const canvas = document.createElement('canvas');
-  canvas.width = Math.round(bitmap.width * scale);
-  canvas.height = Math.round(bitmap.height * scale);
-
-  const context = canvas.getContext('2d');
-  context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-  bitmap.close?.();
-
-  const blob = await new Promise((resolve, reject) => {
-    canvas.toBlob(
-      (result) =>
-        result
-          ? resolve(result)
-          : reject(new Error('Image compression failed')),
-      'image/jpeg',
-      0.78
+  try {
+    const maxDimension = 1200;
+    const scale = Math.min(
+      1,
+      maxDimension / Math.max(bitmap.width, bitmap.height)
     );
-  });
 
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(bitmap.width * scale);
+    canvas.height = Math.round(bitmap.height * scale);
 
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = () => reject(new Error('Unable to read image'));
+    const context = canvas.getContext('2d');
 
-    reader.readAsDataURL(blob);
-  });
+    if (!context) {
+      throw new Error('Unable to process image');
+    }
+
+    context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+
+    const blob = await new Promise((resolve, reject) => {
+      canvas.toBlob(
+        (result) =>
+          result
+            ? resolve(result)
+            : reject(new Error('Image compression failed')),
+        'image/webp',
+        0.8
+      );
+    });
+
+    return new File(
+      [blob],
+      `${file.name.replace(/\.[^.]+$/, '')}.webp`,
+      { type: 'image/webp' }
+    );
+  } finally {
+    bitmap.close?.();
+  }
 };
-
 
 const initialForm = {
   name: '',
@@ -84,6 +89,8 @@ const AdminKitForm = () => {
 
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
+  const [newImageFiles, setNewImageFiles] = useState([]);
+const [newImagePreviews, setNewImagePreviews] = useState([]);
 
   // ==========================================
   // FETCH EDIT KIT
@@ -152,6 +159,18 @@ const AdminKitForm = () => {
     fetchKit();
   }, [id, isEditMode]);
 
+
+const displayedImages = [
+  ...form.images.map((src) => ({
+    src,
+    existing: true,
+  })),
+  ...newImagePreviews.map((src) => ({
+    src,
+    existing: false,
+  })),
+];
+
   // ==========================================
   // NORMAL INPUT
   // ==========================================
@@ -178,7 +197,7 @@ const handleFiles = async (fileList) => {
     return;
   }
 
-  if (form.images.length + files.length > 5) {
+  if (form.images.length + newImageFiles.length + files.length > 5) {
     setError('You can upload a maximum of 5 images.');
     return;
   }
@@ -186,19 +205,16 @@ const handleFiles = async (fileList) => {
   try {
     setError('');
 
-    const compressedImages = await Promise.all(
+    const compressedFiles = await Promise.all(
       files.map(compressImageFile)
     );
 
-    setForm((prev) => {
-      const merged = [...prev.images, ...compressedImages];
+    const previews = compressedFiles.map((file) =>
+      URL.createObjectURL(file)
+    );
 
-      return {
-        ...prev,
-        images: merged,
-        image: merged[0] || '',
-      };
-    });
+    setNewImageFiles((prev) => [...prev, ...compressedFiles]);
+    setNewImagePreviews((prev) => [...prev, ...previews]);
   } catch (err) {
     setError(err.message || 'Failed to process images.');
   }
@@ -215,15 +231,31 @@ const handleImageSelect = (e) => {
 };
 
 const removeImage = (index) => {
-  setForm((prev) => {
-    const images = prev.images.filter((_, i) => i !== index);
+  if (index < form.images.length) {
+    setForm((prev) => {
+      const images = prev.images.filter((_, i) => i !== index);
 
-    return {
-      ...prev,
-      images,
-      image: images[0] || '',
-    };
-  });
+      return {
+        ...prev,
+        images,
+        image: images[0] || '',
+      };
+    });
+
+    return;
+  }
+
+  const newIndex = index - form.images.length;
+
+  URL.revokeObjectURL(newImagePreviews[newIndex]);
+
+  setNewImageFiles((prev) =>
+    prev.filter((_, i) => i !== newIndex)
+  );
+
+  setNewImagePreviews((prev) =>
+    prev.filter((_, i) => i !== newIndex)
+  );
 };
   // ==========================================
   // ARRAY INPUTS
@@ -292,7 +324,11 @@ const removeImage = (index) => {
       return 'Description is required';
     }
 
-if (!form.images.length && !form.image.trim()) {
+if (
+  form.images.length === 0 &&
+  newImageFiles.length === 0 &&
+  !form.image.trim()
+) {
   return 'At least one product image is required';
 }
 
@@ -330,6 +366,21 @@ if (!form.images.length && !form.image.trim()) {
     setError('');
 
     const validationError = validate();
+
+    const formData = new FormData();
+
+const kitData = {
+  ...form,
+  image: form.images[0] || form.image || "",
+  images: form.images,
+};
+
+formData.append("kitData", JSON.stringify(kitData));
+
+newImageFiles.forEach((file) => {
+  formData.append("imageFiles", file);
+});
+
 
     if (validationError) {
       setError(validationError);
@@ -403,11 +454,11 @@ if (!form.images.length && !form.image.trim()) {
           Number(form.sortOrder) || 0,
       };
 
-      if (isEditMode) {
-        await updateKit(id, payload);
-      } else {
-        await createKit(payload);
-      }
+if (id) {
+  await updateKit(id, formData);
+} else {
+  await createKit(formData);
+}
 
       navigate('/admin/kits');
     } catch (err) {
@@ -531,35 +582,24 @@ if (!form.images.length && !form.image.trim()) {
     className="rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-5 transition hover:border-orange-400"
   >
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
-      {form.images.map((image, index) => (
-        <div
-          key={`${index}-${image.slice(0, 30)}`}
-          className="relative"
-        >
-          <img
-            src={image}
-            alt={`Product image ${index + 1}`}
-            className="h-28 w-full rounded-lg border bg-white object-contain"
-          />
+{displayedImages.map((item, index) => (
+  <div key={`${index}-${item.src}`} className="image-preview-item">
+    <img
+      src={item.existing ? getKitImageUrl(item.src) : item.src}
+      alt={`Kit image ${index + 1}`}
+    />
 
-          <button
-            type="button"
-            onClick={() => removeImage(index)}
-            aria-label={`Remove image ${index + 1}`}
-            className="absolute right-1 top-1 rounded-full bg-red-600 px-2 py-1 text-xs font-bold text-white"
-          >
-            ✕
-          </button>
+    <button
+      type="button"
+      onClick={() => removeImage(index, item.existing)}
+      aria-label={`Remove image ${index + 1}`}
+    >
+      Remove
+    </button>
+  </div>
+))}
 
-          {index === 0 && (
-            <span className="mt-1 block text-center text-xs font-semibold text-orange-600">
-              Main image
-            </span>
-          )}
-        </div>
-      ))}
-
-      {form.images.length < 5 && (
+      {displayedImages.length < 5 && (
         <label className="flex min-h-28 cursor-pointer flex-col items-center justify-center rounded-lg border border-gray-200 bg-white p-3 text-center hover:border-orange-400">
           <span className="text-3xl">+</span>
           <span className="mt-1 text-xs font-medium">

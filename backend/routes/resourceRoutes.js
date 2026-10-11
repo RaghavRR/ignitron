@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const upload = require('../middleware/upload');
 const { protect } = require('../middleware/auth');
+const optimizeImages = require('../middleware/optimizeImages');
 const {
   getResources,
   getResourcesAdmin,
@@ -16,8 +17,21 @@ const cpUpload = upload.fields([{ name: 'coverImage', maxCount: 1 }, { name: 'fi
 router.get('/', getResources);
 router.get('/admin/all', protect, getResourcesAdmin);
 router.get('/:slug', getResourceBySlug);
-router.post('/', protect, cpUpload, createResource);
-router.put('/:id', protect, cpUpload, updateResource);
+router.post(
+  '/',
+  protect,
+  cpUpload,
+  optimizeImages,
+  createResource
+);
+
+router.put(
+  '/:id',
+  protect,
+  cpUpload,
+  optimizeImages,
+  updateResource
+);
 router.delete('/:id', protect, deleteResource);
 
 module.exports = router;
