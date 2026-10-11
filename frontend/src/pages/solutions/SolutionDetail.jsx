@@ -334,28 +334,6 @@ export default function SolutionDetail({ solution }) {
           </div>
         </div>
       </section>
-
-      {/* FINAL CTA */}
-      <section className="bg-white px-4 py-10 sm:px-6 sm:py-14">
-        <div className="container-max relative mx-auto overflow-hidden rounded-2xl bg-orange-500 px-6 py-9 text-center sm:px-10 sm:py-12 lg:px-14">
-          <div className="pointer-events-none absolute -right-12 -top-20 h-56 w-56 rounded-full border-[28px] border-white/10" />
-          <div className="pointer-events-none absolute -bottom-24 -left-12 h-56 w-56 rounded-full border-[28px] border-white/10" />
-
-          <div className="relative mx-auto max-w-2xl">
-            <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-orange-100">Let’s build something meaningful</p>
-            <h2 className="mt-3 text-2xl font-extrabold tracking-tight text-white sm:text-3xl lg:text-4xl">
-              Ready to bring this solution to your school?
-            </h2>
-            <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-white/90 sm:text-base">
-              Tell us about your goals and we’ll help you plan the next step.
-            </p>
-
-            <Link to="/contact" className="mt-6 inline-flex min-h-12 items-center justify-center gap-3 rounded-lg bg-[#0b1220] px-6 py-3 font-bold text-white transition hover:bg-slate-800">
-              Talk to our team <span aria-hidden="true">↗</span>
-            </Link>
-          </div>
-        </div>
-      </section>
     </>
   );
 }
