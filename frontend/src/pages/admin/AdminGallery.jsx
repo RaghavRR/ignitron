@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import api, { resolveAsset } from '../../api/axios';
 import Loader from '../../components/Loader';
 import { FiTrash2, FiPlus } from 'react-icons/fi';
+import { FiTrash2, FiPlus, FiPlay } from 'react-icons/fi';
 
 const categories = ['Workshops', 'Robotics', 'Innovation Labs', 'Student Projects', 'Competitions', 'Events'];
 
@@ -68,9 +69,33 @@ const AdminGallery = () => {
           {items.map((item) => (
             <div key={item._id} className="relative group rounded-lg overflow-hidden">
               {item.type === 'video' ? (
-                <video src={resolveAsset(item.mediaUrl)} className="w-full h-28 object-cover" muted />
+                <div className="relative w-full h-28 bg-gray-950">
+                  <video
+                    src={resolveAsset(item.mediaUrl)}
+                    className="w-full h-full object-cover"
+                    muted
+                    playsInline
+                    preload="metadata"
+                    onError={(e) => console.error('Gallery video preview failed:', item.mediaUrl, e.currentTarget.error)}
+                  />
+
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-ignitron-orange shadow">
+                      <FiPlay className="ml-0.5" />
+                    </span>
+                  </div>
+
+                  <span className="absolute left-2 top-2 rounded bg-black/70 px-2 py-1 text-[10px] font-semibold uppercase text-white">
+                    Video
+                  </span>
+                </div>
               ) : (
-                <img src={resolveAsset(item.mediaUrl)} alt={item.title} className="w-full h-28 object-cover" />
+                <img
+                  src={resolveAsset(item.mediaUrl)}
+                  alt={item.title}
+                  className="w-full h-28 object-cover"
+                  loading="lazy"
+                />
               )}
               <button
                 onClick={() => handleDelete(item._id)}
