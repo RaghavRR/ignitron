@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api, { resolveAsset } from '../../api/axios';
 import Loader from '../../components/Loader';
-import { FiTrash2, FiPlus } from 'react-icons/fi';
 import { FiTrash2, FiPlus, FiPlay } from 'react-icons/fi';
 
 const categories = ['Workshops', 'Robotics', 'Innovation Labs', 'Student Projects', 'Competitions', 'Events'];
